@@ -1,0 +1,32 @@
+# sudo openocd -f redpitaya2.openocd
+
+# https://www.mail-archive.com/users@rtems.org/msg01964.html
+source [find interface/ftdi/digilent-hs2.cfg]
+transport select jtag
+source [find target/zynq_7000.cfg]
+# kHz
+adapter speed 100  
+
+init
+poll off
+# "IDCODE         (001001)," & -- DEVICE_ID
+irscan zynq_pl.bs 9
+drscan zynq_pl.bs 32 0
+
+# SAMPLE/PRELOAD
+#        "SAMPLE         (000001)," & -- BOUNDARY
+#       "PRELOAD        (000001)," & -- Same as SAMPLE
+#irscan zynq_pl.bs 1
+
+# "EXTEST         (100110)," & -- BOUNDARY
+# https://interrupt.memfault.com/blog/diving-into-jtag-part-3#extest-instructions
+# EXTEST command in JTAG is used to test external circuits connected to the microcontroller pins
+irscan zynq_pl.bs 38
+while true {
+     drscan zynq_pl.bs 32 0x7edffffb 32 0xfb6db6ff 32 0x5edb7de0 32 0x6dbffb6c 32 0xdfedffd9 32 0xfffeffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0x6db7fb6f 32 0xfffffffb 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xfffdffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0x3edbfdff 32 0x7fffffec 32 0xdb6fffff 32 0xfffffff6 32 0xbfffffc3 32 0xffffffd8 2 0x03
+    echo "1"
+    sleep 500
+    drscan zynq_pl.bs 32 0x7edffffb 32 0xfb6db6ff 32 0x5edb7de0 32 0x6dbffb6c 32 0xdfedffd9 32 0xfffdffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0x6db7fb6f 32 0xfffffffb 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0xfffdffff 32 0xffffffff 32 0xffffffff 32 0xffffffff 32 0x3edbfdff 32 0x7fffffed 32 0xdb6fffff 32 0xfffffff6 32 0xbfffffc3 32 0xffffffd8 2 0x03
+    echo "0"
+    sleep 500
+}
